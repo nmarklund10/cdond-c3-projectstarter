@@ -381,6 +381,7 @@ jobs:
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             echo ${OldWorkflowID} > old_workflow.txt
+            cat old_workflow.txt
       - run:
           name: Update cloudfront distribution
           working_directory: .circleci/files
@@ -392,7 +393,7 @@ jobs:
             --tags project=udapeople
       - save_cache:
           paths: [old_workflow.txt]
-          key: old-workflow
+          key: oldworkflow
       - destroy-environment:
           workflowId: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations
@@ -404,11 +405,13 @@ jobs:
       - checkout
       - install-tar-gzip
       - restore_cache:
-          keys: [old-workflow]
+          keys: [oldworkflow]
       - run:
           name: Remove old stacks and files
           command: |
+            ls
             OldWorkflowID=$(cat old_workflow.txt)
+            echo $OldWorkflowID
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
